@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>KOVAX · King of the Pitch</title>
+  <style>
+    /* 1. COLORS: change these and the whole site changes */
+    :root {
+      --bg: #0b0f14;
+      --card: #141a22;
+      --text: #f2f5f9;
+      --muted: #8d99a8;
+      --accent: #22c55e;
+      --danger: #ef4444;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.5;
+    }
+
+    .wrap { max-width: 560px; margin: 0 auto; padding: 24px 16px 48px; }
+
+    /* 2. HERO: the top part */
+    .hero { text-align: center; padding: 40px 0 24px; }
+    .tag {
+      display: inline-block;
+      color: var(--accent);
+      border: 1px solid var(--accent);
+      border-radius: 999px;
+      padding: 4px 12px;
+      font-size: 12px;
+      letter-spacing: 2px;
+    }
+    h1 { font-size: 40px; margin: 16px 0 8px; line-height: 1.1; }
+    .sub { color: var(--muted); }
+
+    /* 3. INFO CARDS: fee, prize, players */
+    .stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin: 24px 0; }
+    .stat { background: var(--card); border-radius: 14px; padding: 16px 8px; text-align: center; }
+    .stat b { display: block; font-size: 20px; color: var(--accent); }
+    .stat span { font-size: 12px; color: var(--muted); }
+
+    /* 4. FORM */
+    form { background: var(--card); border-radius: 18px; padding: 20px; }
+    h2 { margin-bottom: 16px; }
+    label { display: block; font-size: 14px; margin: 14px 0 6px; color: var(--muted); }
+    input {
+      width: 100%;
+      padding: 12px;
+      border-radius: 10px;
+      border: 1px solid #2a3441;
+      background: var(--bg);
+      color: var(--text);
+      font-size: 16px;
+    }
+    input:focus { outline: 2px solid var(--accent); }
+    button {
+      width: 100%;
+      margin-top: 20px;
+      padding: 14px;
+      border: 0;
+      border-radius: 10px;
+      background: var(--accent);
+      color: #04130a;
+      font-size: 16px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+    .msg { margin-top: 14px; font-size: 14px; min-height: 20px; }
+    .msg.ok { color: var(--accent); }
+    .msg.err { color: var(--danger); }
+    footer { text-align: center; color: var(--muted); font-size: 12px; margin-top: 32px; }
+  </style>
+</head>
+<body>
+  <main class="wrap">
+
+    <section class="hero">
+      <span class="tag">SEASON 01</span>
+      <h1>King of the Pitch</h1>
+      <p class="sub">The PlayStation football tournament in Addis Ababa.</p>
+    </section>
+
+    <section class="stats">
+      <div class="stat"><b>32</b><span>Players</span></div>
+      <div class="stat"><b>800 ETB</b><span>Entry fee</span></div>
+      <div class="stat"><b>10,000 ETB</b><span>Prize</span></div>
+    </section>
+
+    <form id="regForm" novalidate>
+      <h2>Register now</h2>
+
+      <label for="name">Full name</label>
+      <input id="name" type="text" placeholder="Your name" />
+
+      <label for="phone">Phone number</label>
+      <input id="phone" type="tel" placeholder="09XXXXXXXX" />
+
+      <label for="tag">PlayStation gamer tag</label>
+      <input id="tag" type="text" placeholder="Your PSN name" />
+
+      <button type="submit">Join the tournament</button>
+      <p id="msg" class="msg"></p>
+    </form>
+
+    <footer>
+      © 2026 KOVAX · Built by Natanim with help from AI tools
+    </footer>
+  </main>
+
+  <script>
+    // 5. JAVASCRIPT: what happens when someone presses the button
+    const form = document.getElementById("regForm");
+    const msg = document.getElementById("msg");
+    const MAX_PLAYERS = 32;
+
+    form.addEventListener("submit", function (event) {
+      event.preventDefault(); // stop the page from reloading
+
+      const name = document.getElementById("name").value.trim();
+      const phone = document.getElementById("phone").value.trim();
+      const tag = document.getElementById("tag").value.trim();
+
+      // Check the inputs
+      if (name.length < 2) return show("Please write your full name.", "err");
+      // Ethiopian phone: 09 or 07 + 8 digits
+      if (!/^0[79]\d{8}$/.test(phone)) return show("Phone must look like 09XXXXXXXX.", "err");
+      if (tag.length < 2) return show("Please write your gamer tag.", "err");
+
+      // Save in the browser (localStorage). Later we can use a real database.
+      const players = JSON.parse(localStorage.getItem("players") || "[]");
+
+      if (players.length >= MAX_PLAYERS) return show("Sorry, the tournament is full.", "err");
+      if (players.some(p => p.phone === phone)) return show("This phone number is already registered.", "err");
+
+      players.push({ name, phone, tag });
+      localStorage.setItem("players", JSON.stringify(players));
+
+      form.reset();
+      show("You are in, " + name + "! Spot " + players.length + " of " + MAX_PLAYERS + ".", "ok");
+    });
+
+    function show(text, type) {
+      msg.textContent = text;
+      msg.className = "msg " + type;
+    }
+  </script>
+</body>
+</html>
